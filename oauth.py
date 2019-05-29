@@ -79,10 +79,15 @@ class SimpleOAuthAuthenticator(object):
             except OSError:
                 continue
             break
-        webbrowser.open_new(
-            "%s/o/authorize?client_id=%s&state=random_state_string&response_type=code&"
-            "redirect_uri=http://localhost:%s/consumer/exchange/" % (self.server_url, self.client_id, port),
+        authorize_url = (
+            "/o/authorize?client_id=%s&state=random_state_string&response_type=code&"
+            "redirect_uri=http://localhost:%s/consumer/exchange/" % (self.client_id, port)
         )
+        if register:
+            authorize_url = "%s/accounts/register/?next=%s" % (self.server_url, urlquote(authorize_url))
+        else:
+            authorize_url = "%s%s" % (self.server_url, authorize_url)
+        webbrowser.open_new(authorize_url)
 
         httpServer.handle_request()
         authorization_code = httpServer.authorization_code
